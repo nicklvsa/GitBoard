@@ -1,0 +1,9 @@
+{
+  "name": "GitBoard",
+  "version": "0.0.1",
+  "dependencies": {
+    "@julusian/jpeg-turbo": "^0.5.1",
+    "elgato-stream-deck": "^3.0.0",
+    "path": "^0.12.7"
+  }
+}

@@ -1,0 +1,3 @@
+# GitBoard - the wonderful git macro manager for the Stream Deck!
+
+## Documentation coming soon...
