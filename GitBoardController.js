@@ -1,3 +1,8 @@
+/*
+	https://github.com/Lange/node-elgato-stream-deck
+	using this library to interact with stream deck
+*/
+
 const path = require('path');
 const { openStreamDeck } = require('elgato-stream-deck');
 
