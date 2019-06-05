@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>GitBoard</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+	 <link type="text/css" rel="stylesheet" href="assets/styling/materialize/css/materialize.min.css" media="screen, projection">
+	 <link rel="stylesheet" type="text/css" href="assets/styling/style.css">
+</head>
+<body>
+	<div class="section no-pad-bot padded">
+		<div class="container">
+			<h1 class="header center blue-text">GitBoard</h1>
+			<div class="row center">
+				<h5 class="header col s12 light">Connect your Stream Deck, open GitBoard, click run!</h5>
+			</div>
+			<div class="row center">
+				<button  id="run-button" class="waves-effect waves-light btn-large blue"><i class="material-icons right">build</i>Run GitBoard!</button>
+			</div>
+			<div class="row center">
+				<button id="quit-button" class="waves-effect waves-light btn-small red"><i class="material-icons right">close</i>Quit GitBoard!</button>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript" src="assets/styling/materialize/js/materialize.min.js"></script>
+	<script type="text/javascript">
+		window.$ = window.jQuery = require('jquery');
+		const {ipcRenderer} = require('electron');
+
+		$('#run-button').on('click', () => {
+			ipcRenderer.send('start-button', 'click');
+		});
+
+		$('#quit-button').on('click', () => {
+			ipcRenderer.send('quit-button', 'click');
+		});
+	</script>
+</body>
+</html>

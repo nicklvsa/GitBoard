@@ -1,0 +1,11 @@
+::-webkit-scrollbar {
+    display: none; 
+}
+
+body {
+	overflow: hidden;
+}
+
+.padded {
+	padding-bottom: 55px;
+}
