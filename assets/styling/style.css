@@ -15,6 +15,10 @@ body {
 	width: 128px;
 }
 
+.sized-icon {
+	font-size: 10px;
+}
+
 #cancel-button, #run-button {
 	animation-name: bounce-in;
 	animation-duration: 2s;
