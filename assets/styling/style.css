@@ -17,7 +17,7 @@ body {
 
 #cancel-button, #run-button {
 	animation-name: bounce-in;
-	animation-duration: 1.4s;
+	animation-duration: 2s;
 }
 
 @keyframes bounce-in {
@@ -25,10 +25,10 @@ body {
 	 	transform: scale(1, 1) translateY(0); 
 	 }
      10%  { 
-     	transform: scale(1.1, .9) translateY(0); 
+     	transform: scale(.9, 1.1) translateY(-100px);
      }
      30%  { 
-     	transform: scale(.9, 1.1) translateY(-100px); 
+     	transform: scale(1.1, .9) translateY(0); 
      }
      50%  { 
      	transform: scale(1, 1) translateY(0); 
