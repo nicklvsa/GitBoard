@@ -113,6 +113,11 @@ function setupController(evt) {
 	if(listStreamDecks() !== null && listStreamDecks() !== undefined) {
 		const streamDecks = listStreamDecks();
 		streamDecks.forEach((device) => {
+			/*
+				- GitBoard will only support one Stream Deck -
+				TODO: use Stream Deck serial identificaiton to check click
+				events from each individual stream deck
+			*/
 			console.log("Connected Stream Decks: " + JSON.stringify(device));
 		});
 		evt.reply('switch-to-loader', 'show');
@@ -139,6 +144,7 @@ function setupController(evt) {
 
 function destroyController() {
 	console.log("destory testing");
+	//TODO: fix controller deletion
 	mainWindow.webContents.removeListener('up', controller);
 	mainWindow.webContents.removeListener('down', controller);
 }

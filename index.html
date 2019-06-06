@@ -24,14 +24,14 @@
 	</div>
 	<script type="text/javascript" src="assets/styling/materialize/js/materialize.min.js"></script>
 	<script type="text/javascript">
-		window.$ = window.jQuery = require('jquery');
 		const {ipcRenderer} = require('electron');
+	 	window.$ = window.jQuery = require('jquery');
 
 		ipcRenderer.on('switch-to-loader', (evt, arg) => {
 			if(arg === "show") {
 				ipcRenderer.send('window-h', '550');
 				$('#info-show').html(`
-					<img class="loader" draggable="false" src="assets/general/loader.gif" alt="GitBoard waiting for input">
+					<img class="loader" draggable="false" src="assets/general/loader.gif" alt="GitBoard waiting for input" />
 					<button id="cancel-button" class="waves-effect waves-light btn-large button-spin yellow"><i class="material-icons btn-spinner right">remove</i> Disable GitBoard</button>
 				`);
 			} else if(arg === "hide") {
@@ -42,12 +42,12 @@
 			}
 		});
 
-		$('#cancel-button').on('click', () => {
-			ipcRenderer.send('cancel-button', 'click');
-		});
-
 		$('#run-button').on('click', () => {
 			ipcRenderer.send('start-button', 'click');
+		});
+
+		$('#cancel-button').on('click', () => {
+			ipcRenderer.send('cancel-button', 'click');
 		});
 
 		$('#quit-button').on('click', () => {
