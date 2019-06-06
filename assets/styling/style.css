@@ -9,3 +9,8 @@ body {
 .padded {
 	padding-bottom: 55px;
 }
+
+.loader {
+	height: 128px;
+	width: 128px;
+}

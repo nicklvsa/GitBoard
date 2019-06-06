@@ -14,7 +14,7 @@
 			<div class="row center">
 				<h5 class="header col s12 light">Connect your Stream Deck, open GitBoard, click run!</h5>
 			</div>
-			<div class="row center">
+			<div class="row center" id="info-show">
 				<button  id="run-button" class="waves-effect waves-light btn-large blue"><i class="material-icons right">build</i>Run GitBoard!</button>
 			</div>
 			<div class="row center">
@@ -26,6 +26,18 @@
 	<script type="text/javascript">
 		window.$ = window.jQuery = require('jquery');
 		const {ipcRenderer} = require('electron');
+
+		ipcRenderer.on('switch-to-loader', (evt, arg) => {
+			if(arg === "show") {
+				$('#info-show').html(`
+					<img class="loader" src="assets/general/loader.gif" alt="GitBoard waiting for input">
+				`);
+			} else if(arg === "hide") {
+				$('#info-show').html(`
+					<button  id="run-button" class="waves-effect waves-light btn-large blue"><i class="material-icons right">build</i>Run GitBoard!</button>
+				`);
+			}
+		});
 
 		$('#run-button').on('click', () => {
 			ipcRenderer.send('start-button', 'click');

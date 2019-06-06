@@ -1,9 +1,10 @@
-const {app, BrowserWindow, ipcMain} = require('electron');
-const {openStreamDeck} = require('elgato-stream-deck');
+const {app, Tray, BrowserWindow, ipcMain, Menu, dialog} = require('electron');
+const {openStreamDeck, listStreamDecks} = require('elgato-stream-deck');
 const path = require('path');
 
 let mainWindow = null;
 var runtimeModifiedKeys = [];
+let gitboardIcon = path.join(__dirname, 'assets/general/gitboard.png');
 
 const controller = openStreamDeck();
 
@@ -18,6 +19,8 @@ function init() {
 
 	function createWindow() {
 
+		var appIcon = new Tray(gitboardIcon);
+
 		const options = {
 			width: 300,
 			minWidth: 300,
@@ -26,6 +29,7 @@ function init() {
 			minHeight: 460,
 			maxHeight: 460,
 			title: app.getName(),
+			icon: gitboardIcon,
 			webPreferences: {
 				nodeIntegration: true
 			}
@@ -46,6 +50,36 @@ function init() {
 		mainWindow.loadURL(path.join('file://', __dirname, 'index.html'));
 		mainWindow.setMenu(null);
 
+		var trayMenu = Menu.buildFromTemplate([
+			{
+				label: 'Show GitBoard', click: () => {
+					mainWindow.show();
+				}
+			},
+			{
+				label: 'Quit GitBoard', click: () => {
+					exitApp();
+				}
+			},
+			{
+				label: 'Actions',
+				submenu: [
+					{
+						label: 'Enable Inputs', click: () => {
+							hookCurrentControllerListeners(true);
+						}
+					},
+					{
+						label: 'Disable Inputs', click: () => {
+							hookCurrentControllerListeners(false);
+						}
+					}
+				]
+			}
+		]);
+
+		appIcon.setContextMenu(trayMenu);
+
 		if(process.platform === 'win32') {
 			let size = mainWindow.getSize();
 			mainWindow.setSize(size[0], parseInt(size[0] * 9 / 16));
@@ -53,6 +87,11 @@ function init() {
 
 		mainWindow.on('closed', () => {
 			mainWindow = null;
+		});
+
+		mainWindow.on('minimize', (evt) => {
+			evt.preventDefault();
+			mainWindow.hide();
 		});
 	}
 
@@ -70,6 +109,14 @@ function init() {
 }
 
 function setupController() {
+
+	if(listStreamDecks() !== null && listStreamDecks() !== undefined) {
+		const streamDecks = listStreamDecks();
+		streamDecks.forEach((device) => {
+			console.log("Connected Stream Decks: " + JSON.stringify(device));
+		});
+	}
+
 	controller.on('down', keyIndex => {
 		if(!(keyIndex in runtimeModifiedKeys)) {
 			runtimeModifiedKeys.push(keyIndex);
@@ -85,6 +132,7 @@ function setupController() {
 
 	controller.on('error', error => {
 		console.error(error);
+		exitApp();
 	});
 }
 
@@ -95,6 +143,24 @@ function handleEvents() {
 
 	ipcMain.on('start-button', (evt, arg) => {
 		setupController();
+		evt.reply('switch-to-loader', 'show');
+	});
+}
+
+function hookCurrentControllerListeners(toggle) {
+	/*if(toggle) {
+		//run enable code
+	} else {
+		//run disable code
+	}*/
+	const options = {
+		type: 'info',
+		buttons: ['Ok'],
+		title: 'Info!',
+		message: 'This feature is coming soon!'
+	};
+	const response = dialog.showMessageBox(null, options, (resp) => {
+		console.log(resp);
 	});
 }
 
