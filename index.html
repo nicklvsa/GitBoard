@@ -29,10 +29,12 @@
 
 		ipcRenderer.on('switch-to-loader', (evt, arg) => {
 			if(arg === "show") {
+				ipcRenderer.send('window-h', '520');
 				$('#info-show').html(`
 					<img class="loader" src="assets/general/loader.gif" alt="GitBoard waiting for input">
 				`);
 			} else if(arg === "hide") {
+				ipcRenderer.send('window-h', '460');
 				$('#info-show').html(`
 					<button  id="run-button" class="waves-effect waves-light btn-large blue"><i class="material-icons right">build</i>Run GitBoard!</button>
 				`);

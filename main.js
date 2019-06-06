@@ -27,7 +27,7 @@ function init() {
 			maxWidth: 300,
 			height: 460,
 			minHeight: 460,
-			maxHeight: 460,
+			maxHeight: 520,
 			title: app.getName(),
 			icon: gitboardIcon,
 			webPreferences: {
@@ -49,6 +49,7 @@ function init() {
 		mainWindow = new BrowserWindow(options);
 		mainWindow.loadURL(path.join('file://', __dirname, 'index.html'));
 		mainWindow.setMenu(null);
+		mainWindow.setResizable(false);
 
 		var trayMenu = Menu.buildFromTemplate([
 			{
@@ -108,13 +109,13 @@ function init() {
 	});
 }
 
-function setupController() {
-
+function setupController(evt) {
 	if(listStreamDecks() !== null && listStreamDecks() !== undefined) {
 		const streamDecks = listStreamDecks();
 		streamDecks.forEach((device) => {
 			console.log("Connected Stream Decks: " + JSON.stringify(device));
 		});
+		evt.reply('switch-to-loader', 'show');
 	}
 
 	controller.on('down', keyIndex => {
@@ -142,8 +143,13 @@ function handleEvents() {
 	});
 
 	ipcMain.on('start-button', (evt, arg) => {
-		setupController();
-		evt.reply('switch-to-loader', 'show');
+		setupController(evt);
+	});
+
+	ipcMain.on('window-h', (evt, arg) => {
+		if(arg !== undefined && arg !== '') {
+			mainWindow.setSize(300, parseInt(arg)); 
+		}
 	});
 }
 
