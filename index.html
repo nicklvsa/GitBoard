@@ -32,7 +32,7 @@
 				ipcRenderer.send('window-h', '550');
 				$('#info-show').html(`
 					<img class="loader" draggable="false" src="assets/general/loader.gif" alt="GitBoard waiting for input">
-					<button id="cancel-button" class="waves-effect waves-light btn-large button-spin yellow"><i class="material-icons btn-spinner right">remove</i> Disabled GitBoard</button>
+					<button id="cancel-button" class="waves-effect waves-light btn-large button-spin yellow"><i class="material-icons btn-spinner right">remove</i> Disable GitBoard</button>
 				`);
 			} else if(arg === "hide") {
 				ipcRenderer.send('window-h', '460');

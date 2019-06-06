@@ -24,7 +24,7 @@ function init() {
 		const options = {
 			width: 300,
 			minWidth: 300,
-			maxWidth: 300,
+			maxWidth: 800,
 			height: 460,
 			minHeight: 460,
 			maxHeight: 800,
@@ -139,8 +139,8 @@ function setupController(evt) {
 
 function destroyController() {
 	console.log("destory testing");
-	controller.removeListener('down');
-	controller.removeListener('up');
+	mainWindow.webContents.removeListener('up', controller);
+	mainWindow.webContents.removeListener('down', controller);
 }
 
 function handleEvents() {
@@ -182,6 +182,8 @@ function hookCurrentControllerListeners(toggle) {
 }
 
 function makeSingleInstance() {
+	//TODO: fix
+	//this code is currently breaking icon tray rendering
 	if(process.mas) return;
 	app.requestSingleInstanceLock();
 	app.on('second-instance', () => {
