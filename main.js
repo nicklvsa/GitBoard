@@ -27,7 +27,7 @@ function init() {
 			maxWidth: 300,
 			height: 460,
 			minHeight: 460,
-			maxHeight: 520,
+			maxHeight: 800,
 			title: app.getName(),
 			icon: gitboardIcon,
 			webPreferences: {
@@ -137,6 +137,12 @@ function setupController(evt) {
 	});
 }
 
+function destroyController() {
+	console.log("destory testing");
+	controller.removeListener('down');
+	controller.removeListener('up');
+}
+
 function handleEvents() {
 	ipcMain.on('quit-button', (evt, arg) => {
 		exitApp();
@@ -144,6 +150,11 @@ function handleEvents() {
 
 	ipcMain.on('start-button', (evt, arg) => {
 		setupController(evt);
+	});
+
+	ipcMain.on('cancel-button', (evt, arg) => {
+		console.log("testings");
+		destroyController();
 	});
 
 	ipcMain.on('window-h', (evt, arg) => {

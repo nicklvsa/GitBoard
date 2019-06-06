@@ -17,7 +17,7 @@
 			<div class="row center" id="info-show">
 				<button  id="run-button" class="waves-effect waves-light btn-large blue"><i class="material-icons right">build</i>Run GitBoard!</button>
 			</div>
-			<div class="row center">
+			<div class="row center" id="quit-show">
 				<button id="quit-button" class="waves-effect waves-light btn-small red"><i class="material-icons right">close</i>Quit GitBoard!</button>
 			</div>
 		</div>
@@ -29,16 +29,21 @@
 
 		ipcRenderer.on('switch-to-loader', (evt, arg) => {
 			if(arg === "show") {
-				ipcRenderer.send('window-h', '520');
+				ipcRenderer.send('window-h', '550');
 				$('#info-show').html(`
-					<img class="loader" src="assets/general/loader.gif" alt="GitBoard waiting for input">
+					<img class="loader" draggable="false" src="assets/general/loader.gif" alt="GitBoard waiting for input">
+					<button id="cancel-button" class="waves-effect waves-light btn-large yellow"><i class="material-icons right">remove</i>Disabled GitBoard</button>
 				`);
 			} else if(arg === "hide") {
 				ipcRenderer.send('window-h', '460');
 				$('#info-show').html(`
-					<button  id="run-button" class="waves-effect waves-light btn-large blue"><i class="material-icons right">build</i>Run GitBoard!</button>
+					<button id="run-button" class="waves-effect waves-light btn-large blue"><i class="material-icons right">build</i>Run GitBoard!</button>
 				`);
 			}
+		});
+
+		$('#cancel-button').on('click', () => {
+			ipcRenderer.send('cancel-button', 'click');
 		});
 
 		$('#run-button').on('click', () => {
