@@ -1,11 +1,13 @@
 const {app, Tray, BrowserWindow, ipcMain, Menu, dialog} = require('electron');
 const {openStreamDeck, listStreamDecks} = require('elgato-stream-deck');
 const path = require('path');
+const fs = require('fs');
 
 let mainWindow = null;
 var runtimeModifiedKeys = [];
 let gitboardIcon = path.join(__dirname, 'assets/general/gitboard.png');
 
+let appIcon = null;
 const controller = openStreamDeck();
 
 if(process.mas) app.setName("GitBoard");
@@ -19,7 +21,7 @@ function init() {
 
 	function createWindow() {
 
-		var appIcon = new Tray(gitboardIcon);
+		appIcon = new Tray(gitboardIcon);
 
 		const options = {
 			width: 300,
@@ -79,6 +81,7 @@ function init() {
 			}
 		]);
 
+		appIcon.setToolTip('GitBoard Area');
 		appIcon.setContextMenu(trayMenu);
 
 		if(process.platform === 'win32') {
@@ -143,10 +146,9 @@ function setupController(evt) {
 }
 
 function destroyController() {
-	console.log("destory testing");
-	//TODO: fix controller deletion
-	mainWindow.webContents.removeListener('up', controller);
-	mainWindow.webContents.removeListener('down', controller);
+	clearKeys();
+	app.relaunch();
+	app.exit();
 }
 
 function handleEvents() {
@@ -155,11 +157,37 @@ function handleEvents() {
 	});
 
 	ipcMain.on('start-button', (evt, arg) => {
-		setupController(evt);
+		const errOpts = {
+			type: 'error',
+			buttons: ['Ok'],
+			title: 'Error!',
+			message: ''
+		};
+		const selectedFolders = dialog.showOpenDialog(mainWindow, {
+			title: 'Select a project using GIT!',
+			properties: ['openDirectory']
+		});
+		if(selectedFolders !== null && selectedFolders !== '' && selectedFolders !== undefined) {
+			const gitFolder = selectedFolders[0];
+			fs.exists(gitFolder + path.sep + '.git', (exists) => {
+				if (exists) {
+					setupController(evt);
+				} else {
+					errOpts.message = 'The folder you selected is not a valid GIT project!';
+					dialog.showMessageBox(mainWindow, errOpts, (resp) => {
+						console.log(resp);
+					});
+				}
+			});
+		} else {
+			errOpts.message = 'Please select a git project to continue!';
+			dialog.showMessageBox(mainWindow, errOpts, (resp) => {
+				console.log(resp);
+			});
+		}
 	});
 
 	ipcMain.on('cancel-button', (evt, arg) => {
-		console.log("testings");
 		destroyController();
 	});
 
@@ -182,14 +210,12 @@ function hookCurrentControllerListeners(toggle) {
 		title: 'Info!',
 		message: 'This feature is coming soon!'
 	};
-	const response = dialog.showMessageBox(null, options, (resp) => {
+	dialog.showMessageBox(mainWindow, options, (resp) => {
 		console.log(resp);
 	});
 }
 
 function makeSingleInstance() {
-	//TODO: fix
-	//this code is currently breaking icon tray rendering
 	if(process.mas) return;
 	app.requestSingleInstanceLock();
 	app.on('second-instance', () => {
@@ -200,12 +226,16 @@ function makeSingleInstance() {
 	});
 }
 
-function exitApp() {
+function clearKeys() {
 	if(runtimeModifiedKeys !== undefined && runtimeModifiedKeys.length !== 0) {
 		for(var i = 0; i < runtimeModifiedKeys.length; i++) {
 			controller.clearKey(runtimeModifiedKeys[i]);
 		}
 	}
+}
+
+function exitApp() {
+	clearKeys();
 	app.quit();
 }
 

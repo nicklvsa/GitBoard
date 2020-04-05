@@ -15,7 +15,10 @@
 				<h5 class="header col s12 light">Connect your Stream Deck, open GitBoard, click run!</h5>
 			</div>
 			<div class="row center" id="info-show">
-				<button  id="run-button" class="waves-effect button-spin waves-light btn-large blue"><i class="material-icons btn-spinner right">arrow_forward</i> Run GitBoard!</button>
+				<button id="run-button" class="waves-effect button-spin waves-light btn-large blue"><i class="material-icons btn-spinner right">arrow_forward</i> Run GitBoard!</button>
+			</div>
+			<div class="row center" id="cancel-show">
+				<button id="cancel-button" class="waves-effect waves-light btn-large button-spin yellow"><i class="material-icons btn-spinner right">remove</i> Disable GitBoard</button>
 			</div>
 			<div class="row center" id="quit-show">
 				<button id="quit-button" class="waves-effect button-spin waves-light btn-small red"><i class="material-icons btn-spinner right">close</i> Quit GitBoard!</button>
@@ -25,15 +28,18 @@
 	<script type="text/javascript" src="assets/styling/materialize/js/materialize.min.js"></script>
 	<script type="text/javascript">
 		const {ipcRenderer} = require('electron');
-	 	window.$ = window.jQuery = require('jquery');
+		window.$ = window.jQuery = require('jquery');
+		 
+		$('#cancel-button').hide();
 
 		ipcRenderer.on('switch-to-loader', (evt, arg) => {
 			if(arg === "show") {
 				ipcRenderer.send('window-h', '550');
 				$('#info-show').html(`
 					<img class="loader" draggable="false" src="assets/general/loader.gif" alt="GitBoard waiting for input" />
-					<button id="cancel-button" class="waves-effect waves-light btn-large button-spin yellow"><i class="material-icons btn-spinner right">remove</i> Disable GitBoard</button>
 				`);
+				$('#run-button').hide();
+				$('#cancel-button').show();
 			} else if(arg === "hide") {
 				ipcRenderer.send('window-h', '460');
 				$('#info-show').html(`
