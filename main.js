@@ -1,20 +1,34 @@
 const {app, Tray, BrowserWindow, ipcMain, Menu, dialog} = require('electron');
 const {openStreamDeck, listStreamDecks} = require('elgato-stream-deck');
+const {genText} = require('./textgen');
+const {v1: uuid} = require('uuid');
 const path = require('path');
+const os = require('os');
 const fs = require('fs');
 
+let appIcon = null;
 let mainWindow = null;
-var runtimeModifiedKeys = [];
+let runtimeModifiedKeys = [];
 let gitboardIcon = path.join(__dirname, 'assets/general/gitboard.png');
 
-let appIcon = null;
 const controller = openStreamDeck();
+const loadedProjects = [];
+
+const errOpts = {
+	type: 'error',
+	buttons: ['Ok'],
+	title: '!',
+	message: ''
+};
+const defaultConfigOpts = {
+	name: '',
+	id: '',
+	selected: false
+};
 
 if(process.mas) app.setName("GitBoard");
 
 function init() {
-
-	console.log("init");
 
 	makeSingleInstance();
 	handleEvents();
@@ -68,13 +82,8 @@ function init() {
 				label: 'Actions',
 				submenu: [
 					{
-						label: 'Enable Inputs', click: () => {
-							hookCurrentControllerListeners(true);
-						}
-					},
-					{
-						label: 'Disable Inputs', click: () => {
-							hookCurrentControllerListeners(false);
+						label: 'Control Another Project', click: () => {
+							beginProjectSelection(null);
 						}
 					}
 				]
@@ -157,34 +166,7 @@ function handleEvents() {
 	});
 
 	ipcMain.on('start-button', (evt, arg) => {
-		const errOpts = {
-			type: 'error',
-			buttons: ['Ok'],
-			title: 'Error!',
-			message: ''
-		};
-		const selectedFolders = dialog.showOpenDialog(mainWindow, {
-			title: 'Select a project using GIT!',
-			properties: ['openDirectory']
-		});
-		if(selectedFolders !== null && selectedFolders !== '' && selectedFolders !== undefined) {
-			const gitFolder = selectedFolders[0];
-			fs.exists(gitFolder + path.sep + '.git', (exists) => {
-				if (exists) {
-					setupController(evt);
-				} else {
-					errOpts.message = 'The folder you selected is not a valid GIT project!';
-					dialog.showMessageBox(mainWindow, errOpts, (resp) => {
-						console.log(resp);
-					});
-				}
-			});
-		} else {
-			errOpts.message = 'Please select a git project to continue!';
-			dialog.showMessageBox(mainWindow, errOpts, (resp) => {
-				console.log(resp);
-			});
-		}
+		beginProjectSelection(evt);
 	});
 
 	ipcMain.on('cancel-button', (evt, arg) => {
@@ -198,21 +180,79 @@ function handleEvents() {
 	});
 }
 
-function hookCurrentControllerListeners(toggle) {
-	/*if(toggle) {
-		//run enable code
-	} else {
-		//run disable code
-	}*/
-	const options = {
-		type: 'info',
-		buttons: ['Ok'],
-		title: 'Info!',
-		message: 'This feature is coming soon!'
-	};
-	dialog.showMessageBox(mainWindow, options, (resp) => {
-		console.log(resp);
+function beginProjectSelection(evt) {
+	const selectedFolders = dialog.showOpenDialog(mainWindow, {
+		title: 'Select a project using GIT!',
+		properties: ['openDirectory']
 	});
+	if(selectedFolders !== null && selectedFolders !== '' && selectedFolders !== undefined) {
+		const gitFolder = selectedFolders[0];
+		fs.exists(gitFolder + path.sep + '.git', (gitExists) => {
+			if (gitExists) {
+				gitBoardCfgPath = gitFolder + path.sep + 'gitboard.json';
+				defaultConfigOpts.name = gitFolder.substring(gitFolder.lastIndexOf(path.sep) + 1);
+				defaultConfigOpts.id = genProjectIdentifier();
+				defaultConfigOpts.selected = false;
+				const content = JSON.stringify(defaultConfigOpts);
+				fs.exists(gitBoardCfgPath, (cfgExists) => {
+					if(!cfgExists) {
+						fs.writeFile(gitBoardCfgPath, content, (err) => {
+							if(err) {
+								errOpts.message = 'Could not write the GitBoard config file to your project!';
+								dialog.showMessageBox(mainWindow, errOpts);
+							} else {
+								const parsed = JSON.parse(content);
+								loadedProjects.push(parsed)
+								if(evt !== null) setupController(evt);
+								setupProjects();
+							}
+						});
+					} else {
+						fs.readFile(gitBoardCfgPath, (err, data) => {
+							if(err) {
+								errOpts.message = 'Could not load the GitBoard config file from your project!';
+								dialog.showMessageBox(mainWindow, errOpts);
+							} else {
+								const parsed = JSON.parse(data);
+								loadedProjects.push(parsed)
+								if(evt !== null) setupController(evt);
+								setupProjects();
+							}
+						});
+					}
+				});
+			} else {
+				errOpts.message = 'The folder you selected is not a valid GIT project!';
+				dialog.showMessageBox(mainWindow, errOpts, (resp) => {
+					console.log(resp);
+				});
+			}
+		});
+	} else {
+		errOpts.message = 'Please select a git project to continue!';
+		dialog.showMessageBox(mainWindow, errOpts, (resp) => {
+			console.log(resp);
+		});
+	}
+}
+
+function genProjectIdentifier() {
+	return '$' + uuid();
+}
+
+function setupProjects() {
+	/*for(let project of loadedProjects) {
+		const chunkLine = project.name.match(/.{1,8}/g);
+		genText(chunkLine.join('\n'), 8, controller);
+	}*/
+	if (loadedProjects.length > 0) {
+		const current = loadedProjects[0];
+		genText(`Push`, 5, controller);
+		genText(`Pull`, 6, controller);
+		genText(`Commit`, 7, controller);
+		genText(`Checkout`, 8, controller);
+		genText(`Help`, 9, controller);
+	}
 }
 
 function makeSingleInstance() {
