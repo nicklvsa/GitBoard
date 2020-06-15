@@ -1,16 +1,16 @@
 {
   "name": "gitboard",
   "productName": "GitBoard",
-  "version": "0.0.1",
-  "description": "GitBoard - handy stream deck git command manager!",
+  "version": "0.0.5",
+  "description": "GitBoard - the handy stream deck git command manager!",
   "author": "Nicklvsa",
-  "repository": "https://gitlab.com/nicksdesk/GitBoard",
+  "repository": "https://github.com/nicklvsa/GitBoard",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
     "build:linux": "electron-packager . --overwrite --platform=linux --arch=x64 --out=out",
     "build:mac": "electron-packager . --overwrite --platform=darwin --arch=x64 --out=out --icon=assets/icon/mac/app.icns --osx-sign.identity='' --extend-info=assets/mac/info.plist",
-    "build:win": "electron-packager . --overwrite --platform=win32 --arch=ia32 --out=out --icon=assets/icon/win/app.ico"
+    "build:win": "electron-packager . --overwrite --platform=win32 --arch=x64 --out=out --icon=assets/gitboard_app_icon.ico"
   },
   "dependencies": {
     "@julusian/jpeg-turbo": "^0.5.1",
@@ -19,10 +19,10 @@
     "electron-settings": "^3.0.7",
     "electron-shortcut-normalizer": "^1.0.0",
     "elgato-stream-deck": "^3.0.0",
-    "jquery": "^3.4.1",
+    "jquery": "^3.5.1",
     "path": "^0.12.7",
     "pureimage": "^0.2.1",
-    "sharp": "^0.25.2",
+    "sharp": "^0.25.4",
     "stream-buffers": "^3.0.2",
     "update-electron-app": "^1.1.1",
     "uuid": "^7.0.3"
