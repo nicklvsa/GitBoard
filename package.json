@@ -15,6 +15,7 @@
   "dependencies": {
     "@julusian/jpeg-turbo": "^0.5.1",
     "electron-log": "^2.2.14",
+    "electron-prompt": "^1.5.1",
     "electron-settings": "^3.0.7",
     "electron-shortcut-normalizer": "^1.0.0",
     "elgato-stream-deck": "^3.0.0",

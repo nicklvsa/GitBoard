@@ -10,6 +10,9 @@
 <body>
 	<div class="section no-pad-bot padded">
 		<div class="container">
+			<a href="#" id="switch-projects"><h6 class="left" id="current-project">No project active</h6></a>
+		</div>
+		<div class="container">
 			<h1 class="header center blue-text">GitBoard</h1>
 			<div class="row center">
 				<h5 class="header col s12 light">Connect your Stream Deck, open GitBoard, click run!</h5>
@@ -32,6 +35,10 @@
 
 		$('#cancel-button').hide();
 
+		ipcRenderer.on('set-current-project', (evt, arg) => {
+			$('#current-project').text(arg.name);
+		});
+
 		ipcRenderer.on('switch-to-loader', (evt, arg) => {
 			if(arg === "show") {
 				ipcRenderer.send('window-h', '550');
@@ -46,6 +53,10 @@
 					<button id="run-button" class="waves-effect waves-light btn-large blue"><i class="material-icons right">build</i>Run GitBoard!</button>
 				`);
 			}
+		});
+
+		$('#switch-projects').on('click', () => {
+			ipcRenderer.send('switch-projects', 'click');
 		});
 
 		$('#run-button').on('click', () => {

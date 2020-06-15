@@ -1,3 +1,4 @@
+const {gitPull, gitCheckout, gitPush, gitCommit, gitHelp} = require('./gitutils');
 const {app, Tray, BrowserWindow, ipcMain, Menu, dialog} = require('electron');
 const {openStreamDeck, listStreamDecks} = require('elgato-stream-deck');
 const {genText} = require('./textgen');
@@ -6,13 +7,14 @@ const path = require('path');
 const os = require('os');
 const fs = require('fs');
 
+
 let appIcon = null;
 let mainWindow = null;
 let runtimeModifiedKeys = [];
 let gitboardIcon = path.join(__dirname, 'assets/general/gitboard.png');
 
 const controller = openStreamDeck();
-const loadedProjects = [];
+let loadedProjects = {};
 
 const errOpts = {
 	type: 'error',
@@ -23,17 +25,18 @@ const errOpts = {
 const defaultConfigOpts = {
 	name: '',
 	id: '',
+	path: '',
 	selected: false
 };
 
 if(process.mas) app.setName("GitBoard");
 
-function init() {
+const init = () => {
 
 	makeSingleInstance();
 	handleEvents();
 
-	function createWindow() {
+	const createWindow = () => {
 
 		appIcon = new Tray(gitboardIcon);
 
@@ -46,8 +49,10 @@ function init() {
 			maxHeight: 800,
 			title: app.getName(),
 			icon: gitboardIcon,
+			alwaysOnTop: true,
 			webPreferences: {
-				nodeIntegration: true
+				nodeIntegration: true,
+				backgroundThrottling: false,
 			}
 		};
 
@@ -121,7 +126,7 @@ function init() {
 	});
 }
 
-function setupController(evt) {
+const setupController = (evt) => {
 	if(listStreamDecks() !== null && listStreamDecks() !== undefined) {
 		const streamDecks = listStreamDecks();
 		streamDecks.forEach((device) => {
@@ -135,17 +140,31 @@ function setupController(evt) {
 		evt.reply('switch-to-loader', 'show');
 	}
 
-	controller.on('down', keyIndex => {
-		if(!(keyIndex in runtimeModifiedKeys)) {
-			runtimeModifiedKeys.push(keyIndex);
+	controller.on('down', key => {
+		if (loadedProjects && loadedProjects !== {}) {
+			switch (key) {
+				case 5:
+					gitPush(loadedProjects.path, mainWindow, null)
+					break;
+				case 6:
+					gitPull(loadedProjects.path, mainWindow, null);
+					break;
+				case 7:
+					gitCommit(loadedProjects.path, mainWindow, null)
+					break;
+				case 8:
+					gitCheckout(loadedProjects.path, mainWindow, null);
+					break;
+				case 9:
+					gitHelp(loadedProjects.path, mainWindow, null);
+					break;
+				default:
+					dialog.showMessageBox(mainWindow, {
+						message: 'An unknown action or button was pressed!',
+					});
+					break;
+			}
 		}
-		controller.fillColor(keyIndex, 0, 255, 0);
-		console.log('key %d down', keyIndex);
-	});
-
-	controller.on('up', keyIndex => {
-		controller.fillColor(keyIndex, 255, 0, 0);
-		console.log('key %d up', keyIndex);
 	});
 
 	controller.on('error', error => {
@@ -154,13 +173,13 @@ function setupController(evt) {
 	});
 }
 
-function destroyController() {
+const destroyController = () => {
 	clearKeys();
 	app.relaunch();
 	app.exit();
 }
 
-function handleEvents() {
+const handleEvents = () => {
 	ipcMain.on('quit-button', (evt, arg) => {
 		exitApp();
 	});
@@ -178,9 +197,14 @@ function handleEvents() {
 			mainWindow.setSize(300, parseInt(arg)); 
 		}
 	});
+
+	ipcMain.on('switch-projects', (evt, arg) => {
+		beginProjectSelection(null);
+	});
 }
 
-function beginProjectSelection(evt) {
+const beginProjectSelection = (evt) => {
+	loadedProjects = {};
 	const selectedFolders = dialog.showOpenDialog(mainWindow, {
 		title: 'Select a project using GIT!',
 		properties: ['openDirectory']
@@ -193,6 +217,7 @@ function beginProjectSelection(evt) {
 				defaultConfigOpts.name = gitFolder.substring(gitFolder.lastIndexOf(path.sep) + 1);
 				defaultConfigOpts.id = genProjectIdentifier();
 				defaultConfigOpts.selected = false;
+				defaultConfigOpts.path = gitFolder;
 				const content = JSON.stringify(defaultConfigOpts);
 				fs.exists(gitBoardCfgPath, (cfgExists) => {
 					if(!cfgExists) {
@@ -200,11 +225,12 @@ function beginProjectSelection(evt) {
 							if(err) {
 								errOpts.message = 'Could not write the GitBoard config file to your project!';
 								dialog.showMessageBox(mainWindow, errOpts);
+								clearKeys();
 							} else {
 								const parsed = JSON.parse(content);
-								loadedProjects.push(parsed)
+								loadedProjects = parsed;
 								if(evt !== null) setupController(evt);
-								setupProjects();
+								setupProjects(evt);
 							}
 						});
 					} else {
@@ -212,11 +238,12 @@ function beginProjectSelection(evt) {
 							if(err) {
 								errOpts.message = 'Could not load the GitBoard config file from your project!';
 								dialog.showMessageBox(mainWindow, errOpts);
+								clearKeys();
 							} else {
 								const parsed = JSON.parse(data);
-								loadedProjects.push(parsed)
+								loadedProjects = parsed;
 								if(evt !== null) setupController(evt);
-								setupProjects();
+								setupProjects(evt);
 							}
 						});
 					}
@@ -226,6 +253,7 @@ function beginProjectSelection(evt) {
 				dialog.showMessageBox(mainWindow, errOpts, (resp) => {
 					console.log(resp);
 				});
+				clearKeys();
 			}
 		});
 	} else {
@@ -233,29 +261,30 @@ function beginProjectSelection(evt) {
 		dialog.showMessageBox(mainWindow, errOpts, (resp) => {
 			console.log(resp);
 		});
+		clearKeys();
 	}
 }
 
-function genProjectIdentifier() {
-	return '$' + uuid();
+const genProjectIdentifier = () => {
+	return `$${uuid()}`;
 }
 
-function setupProjects() {
-	/*for(let project of loadedProjects) {
-		const chunkLine = project.name.match(/.{1,8}/g);
-		genText(chunkLine.join('\n'), 8, controller);
-	}*/
-	if (loadedProjects.length > 0) {
-		const current = loadedProjects[0];
-		genText(`Push`, 5, controller);
-		genText(`Pull`, 6, controller);
-		genText(`Commit`, 7, controller);
-		genText(`Checkout`, 8, controller);
-		genText(`Help`, 9, controller);
+const setupProjects = (evt) => {
+	if (loadedProjects !== null) {
+		genText(`Push`, useKey(5), controller);
+		genText(`Pull`, useKey(6), controller);
+		genText(`Commit`, useKey(7), controller);
+		genText(`Checkout`, useKey(8), controller);
+		genText(`Help`, useKey(9), controller);
+		if (evt !== null) {
+			evt.reply('set-current-project', loadedProjects);
+		} else {
+			mainWindow.webContents.send('set-current-project', loadedProjects);
+		}
 	}
 }
 
-function makeSingleInstance() {
+const makeSingleInstance = () => {
 	if(process.mas) return;
 	app.requestSingleInstanceLock();
 	app.on('second-instance', () => {
@@ -266,7 +295,7 @@ function makeSingleInstance() {
 	});
 }
 
-function clearKeys() {
+const clearKeys = () => {
 	if(runtimeModifiedKeys !== undefined && runtimeModifiedKeys.length !== 0) {
 		for(var i = 0; i < runtimeModifiedKeys.length; i++) {
 			controller.clearKey(runtimeModifiedKeys[i]);
@@ -274,7 +303,12 @@ function clearKeys() {
 	}
 }
 
-function exitApp() {
+const useKey = (key) => {
+	runtimeModifiedKeys.push(key);
+	return key;
+};
+
+const exitApp = () => {
 	clearKeys();
 	app.quit();
 }

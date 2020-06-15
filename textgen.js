@@ -35,9 +35,6 @@ const wrapText = (ctx, text, x, y, maxWidth, lineHeight) => {
 
 module.exports.genText = (text, keyIndex, streamDeck) => {
     font.load(async () => {
-            console.log(`Filling button #${keyIndex}`)
-            console.log(`with content ${text}`);
-
             const img = PImage.make(streamDeck.ICON_SIZE, streamDeck.ICON_SIZE);
             const ctx = img.getContext('2d');
 
@@ -57,7 +54,7 @@ module.exports.genText = (text, keyIndex, streamDeck) => {
     
             try {
                 await PImage.encodePNGToStream(img, writableStreamBuffer);
-                const pngBuffer = await sharp(path.resolve(__dirname, 'assets/general/github_logo.png'))
+                const pngBuffer = await sharp(path.resolve(__dirname, 'assets/general/gitboard.png'))
                     .resize(streamDeck.ICON_SIZE, streamDeck.ICON_SIZE)
                     .composite([{input: writableStreamBuffer.getContents()}]).png().toBuffer();
                 const finalBuffer = await sharp(pngBuffer).flatten().raw().toBuffer();
