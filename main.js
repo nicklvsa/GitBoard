@@ -7,7 +7,6 @@ const path = require('path');
 const os = require('os');
 const fs = require('fs');
 
-
 let appIcon = null;
 let mainWindow = null;
 let runtimeModifiedKeys = [];
