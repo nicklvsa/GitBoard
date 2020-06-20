@@ -76,6 +76,7 @@ ipcMain.on('new-branch', (evt, arg) => {
             alwaysOnTop: true,
         }).then((resp) => {
             if (resp !== '' && resp !== null) {
+                resp = resp.replace(/ /g, '_');
                 const cmd = `cd ${pubPath} && git checkout -b ${resp}`;
                 exec(cmd, (err, stdout, stderr) => {
                     dialog.showMessageBox(pubCheckoutWindow, {
