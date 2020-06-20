@@ -249,15 +249,15 @@ const genProjectIdentifier = () => {
 
 const setupProjects = (evt) => {
 	if (loadedProjects !== null) {
-		genText(`Push`, useKey(5, gitPush), controller);
-		genText(`Pull`, useKey(6, gitPull), controller);
-		genText(`Commit`, useKey(7, gitCommit), controller);
-		genText(`Checkout`, useKey(8, gitCheckout), controller);
-		genText(`Merge`, useKey(9, gitMerge), controller);
-		genText(`Diff`, useKey(11, gitDiff), controller);
-		genText(`Log`, useKey(12, gitLog), controller);
-		genText(`Status`, useKey(13, gitStatus), controller);
-		genText(`Help`, useKey(14, gitHelp), controller);
+		genText(`Push`, bindKey(5, gitPush), controller);
+		genText(`Pull`, bindKey(6, gitPull), controller);
+		genText(`Commit`, bindKey(7, gitCommit), controller);
+		genText(`Checkout`, bindKey(8, gitCheckout), controller);
+		genText(`Merge`, bindKey(9, gitMerge), controller);
+		genText(`Diff`, bindKey(11, gitDiff), controller);
+		genText(`Log`, bindKey(12, gitLog), controller);
+		genText(`Status`, bindKey(13, gitStatus), controller);
+		genText(`Help`, bindKey(14, gitHelp), controller);
 		if (evt !== null) {
 			evt.reply('set-current-project', loadedProjects);
 		} else {
@@ -285,7 +285,7 @@ const clearKeys = () => {
 	}
 }
 
-const useKey = (key, action) => {
+const bindKey = (key, action) => {
 	for (const k of runtimeModifiedKeys) {
 		if (k === key) {
 			return k;
