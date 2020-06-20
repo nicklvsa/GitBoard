@@ -42,6 +42,10 @@ body {
 	-moz-transform: rotate(360deg);
 }
 
+.branch-actions-row {
+	padding-top: 50px;
+}
+
 #cancel-show {
 	margin-top: -15px;
 }

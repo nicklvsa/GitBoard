@@ -1,4 +1,4 @@
-const {gitPull, gitCheckout, gitPush, gitCommit, gitHelp} = require('./gitutils');
+const {gitPull, gitCheckout, gitPush, gitCommit, gitHelp, gitStatus, gitDiff, gitLog} = require('./gitutils');
 const {app, Tray, BrowserWindow, ipcMain, Menu, dialog} = require('electron');
 const {openStreamDeck, listStreamDecks} = require('elgato-stream-deck');
 const {genText} = require('./textgen');
@@ -155,12 +155,18 @@ const setupController = (evt) => {
 					gitCheckout(loadedProjects.path, mainWindow, null);
 					break;
 				case 9:
+					gitDiff(loadedProjects.path, mainWindow, null);
+					break;
+				case 12:
+					gitLog(loadedProjects.path, mainWindow, null);
+					break;
+				case 13:
+					gitStatus(loadedProjects.path, mainWindow, null);
+					break;
+				case 14:
 					gitHelp(loadedProjects.path, mainWindow, null);
 					break;
 				default:
-					dialog.showMessageBox(mainWindow, {
-						message: 'An unknown action or button was pressed!',
-					});
 					break;
 			}
 		}
@@ -274,7 +280,10 @@ const setupProjects = (evt) => {
 		genText(`Pull`, useKey(6), controller);
 		genText(`Commit`, useKey(7), controller);
 		genText(`Checkout`, useKey(8), controller);
-		genText(`Help`, useKey(9), controller);
+		genText(`Diff`, useKey(9), controller);
+		genText(`Log`, useKey(12), controller);
+		genText(`Status`, useKey(13), controller);
+		genText(`Help`, useKey(14), controller);
 		if (evt !== null) {
 			evt.reply('set-current-project', loadedProjects);
 		} else {

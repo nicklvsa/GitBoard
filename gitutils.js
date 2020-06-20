@@ -7,7 +7,7 @@ const gitWindowOptions = {
     width: 300,
 	minWidth: 300,
 	maxWidth: 800,
-	height: 250,
+	height: 325,
 	minHeight: 460,
 	maxHeight: 800,
 	title: 'GitBoard Selector',
@@ -47,6 +47,54 @@ ipcMain.on('use-branch', (evt, arg) => {
     }
 });
 
+ipcMain.on('delete-branch', (evt, arg) => {
+    if (arg !== '' && arg !== null) {
+        dialog.showMessageBox(pubCheckoutWindow, {
+            title: "Delete Branch",
+            message: `Are you sure you want to delete branch "${arg}"?`,
+            buttons: ["Yes", "No"],
+        }, (response) => {
+            if (response === 0) {
+                const cmd = `cd ${pubPath} && git branch -d ${arg}`;
+                exec(cmd, (err, stdout, stderr) => {
+                    dialog.showMessageBox(pubCheckoutWindow, {
+                        message: `Info: \n${stderr}\n ${stdout}`
+                    });
+                });
+                pubCheckoutWindow.hide();
+            }
+        });
+    }
+});
+
+ipcMain.on('new-branch', (evt, arg) => {
+    if (arg !== '' && arg !== null) {
+        prompt({
+            title: 'Branch name',
+            label: 'Enter new branch name: ',
+            type: 'input',
+            alwaysOnTop: true,
+        }).then((resp) => {
+            if (resp !== '' && resp !== null) {
+                const cmd = `cd ${pubPath} && git checkout -b ${resp}`;
+                exec(cmd, (err, stdout, stderr) => {
+                    dialog.showMessageBox(pubCheckoutWindow, {
+                        message: `Info: ${stderr}\n ${stdout}`,
+                    });
+                });
+                pubCheckoutWindow.hide();
+            } else {
+                dialog.showMessageBox(pubCheckoutWindow, {
+                    message: `Please enter a branch name first!`,
+                    buttons: ['Ok'],
+                });
+            }
+        }).catch((err) => {
+            console.error(err);
+        });
+    }
+});
+
 ipcMain.on('get-branches', (evt, arg) => {
     const cmd = `cd ${pubPath} && git branch`;
     exec(cmd, (err, stdout, stderr) => {
@@ -68,35 +116,55 @@ module.exports.gitPull = (path, window, args) => {
 
 module.exports.gitPush = (path, window, args) => {
     pubPath = path;
-    const cmd = `cd ${path} && git push`;
-    exec(cmd, (err, stdout, stderr) => {
-        dialog.showMessageBox(window, {
-            message: `Info: \n${stderr}\n ${stdout}`
-        });
+    dialog.showMessageBox(window, {
+        title: "Push Changes",
+        message: "Before pushing, ensure you have committed your changes!\nWould you like to continue?",
+        buttons: ["Yes", "No"],
+    }, (response) => {
+        if (response === 0) {
+            const cmd = `cd ${path} && git push`;
+            exec(cmd, (err, stdout, stderr) => {
+                dialog.showMessageBox(window, {
+                    message: `Info: \n${stderr}\n ${stdout}`
+                });
+            });
+        }
     });
 };
 
 module.exports.gitCheckout = (path, window, args) => {
     pubPath = path;
     pubCheckoutWindow = createCheckoutWindow();
-    
-    /*prompt({
-        title: 'Branch name',
-        label: 'Enter branch to switch to: ',
-        type: 'input',
-        alwaysOnTop: true,
-    }).then((resp) => {
-        if (resp !==  null) {
-            const cmd = `cd ${path} && git checkout ${resp}`;
-            exec(cmd, (err, stdout, stderr) => {
-                dialog.showMessageBox(window, {
-                    message: `Info: ${stderr}\n ${stdout}`
-                });
-            });
-        }
-    }).catch((err) => {
-        dialog.showErrorBox('An error occurred!', err);
-    });*/
+};
+
+module.exports.gitStatus = (path, window, args) => {
+    pubPath = path; 
+    const cmd = `cd ${path} && git status`;
+    exec(cmd, (err, stdout, stderr) => {
+        dialog.showMessageBox(window, {
+            message: `Info: ${stderr}\n ${stdout}`
+        });
+    });
+};
+
+module.exports.gitLog = (path, window, args) => {
+    pubPath = path; 
+    const cmd = `cd ${path} && git log`;
+    exec(cmd, (err, stdout, stderr) => {
+        dialog.showMessageBox(window, {
+            message: `Info: ${stderr}\n ${stdout}`
+        });
+    });
+};
+
+module.exports.gitDiff = (path, window, args) => {
+    pubPath = path;
+    const cmd = `cd ${path} && git diff`;
+    exec(cmd, (err, stdout, stderr) => {
+        dialog.showMessageBox(window, {
+            message: `Info: ${(stderr !== null && stderr !== '') ? stderr : 'No diff'}\n ${stdout}`
+        });
+    });
 };
 
 module.exports.gitCommit = (path, window, args) => {
@@ -107,7 +175,7 @@ module.exports.gitCommit = (path, window, args) => {
         type: 'input',
         alwaysOnTop: true,
     }).then((resp) => {
-        if (resp !==  null) {
+        if (resp !== '' && resp !== null) {
             const cmd = `cd ${path} && git add . && git commit -m "${resp}"`;
             exec(cmd, (err, stdout, stderr) => {
                 dialog.showMessageBox(window, {
@@ -123,18 +191,25 @@ module.exports.gitCommit = (path, window, args) => {
                             break;
                         case 1:
                             dialog.showMessageBox(window, {
-                                message: `Info: ${stderr}\n ${stdout}`
+                                message: `Info: ${stderr}\n ${stdout}`,
                             });
                             break;
                         default:
                             dialog.showMessageBox(window, {
-                                message: `Info: ${stderr}\n ${stdout}`
+                                message: `Info: ${stderr}\n ${stdout}`,
                             });
                             break;
                     }
                 });
             });
+        } else {
+            dialog.showMessageBox(window, {
+                message: `Please enter a commit message first!`,
+                buttons: ['Ok'],
+            });
         }
+    }).catch((err) => {
+        console.error(err);
     });
 };
 
