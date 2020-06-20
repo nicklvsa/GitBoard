@@ -155,10 +155,10 @@ const setupController = (evt) => {
 					gitCheckout(loadedProjects.path, mainWindow, null);
 					break;
 				case 9:
-					gitDiff(loadedProjects.path, mainWindow, null);
+					gitMerge(loadedProjects.path, mainWindow, null);
 					break;
 				case 11:
-					gitMerge(loadedProjects.path, mainWindow, null);
+					gitDiff(loadedProjects.path, mainWindow, null);
 					break;
 				case 12:
 					gitLog(loadedProjects.path, mainWindow, null);
@@ -283,8 +283,8 @@ const setupProjects = (evt) => {
 		genText(`Pull`, useKey(6), controller);
 		genText(`Commit`, useKey(7), controller);
 		genText(`Checkout`, useKey(8), controller);
-		genText(`Diff`, useKey(9), controller);
-		genText(`Merge`, useKey(11), controller);
+		genText(`Merge`, useKey(9), controller);
+		genText(`Diff`, useKey(11), controller);
 		genText(`Log`, useKey(12), controller);
 		genText(`Status`, useKey(13), controller);
 		genText(`Help`, useKey(14), controller);
