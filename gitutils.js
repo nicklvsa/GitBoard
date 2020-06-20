@@ -18,6 +18,7 @@ const gitWindowOptions = {
 	}
 };
 
+let pubMergeWindow = null;
 let pubCheckoutWindow = null;
 let pubPath = '';
 
@@ -35,6 +36,20 @@ const createCheckoutWindow = () => {
     return checkoutWindow;
 };
 
+const createMergeWindow = () => {
+    const mergeWindow = new BrowserWindow(gitWindowOptions);
+    mergeWindow.loadURL(path.join('file://', __dirname, 'git_merge.html'));
+    mergeWindow.setMenu(null);
+    mergeWindow.setResizable(false);
+
+    if(process.platform === 'win32') {
+        let size = mergeWindow.getSize();
+        mergeWindow.setSize(size[0], parseInt(size[0] * 9 / 16));
+    }
+
+    return mergeWindow;
+};
+
 ipcMain.on('use-branch', (evt, arg) => {
     if (arg !== '' && arg !== null) {
         const cmd = `cd ${pubPath} && git checkout ${arg}`;
@@ -44,6 +59,18 @@ ipcMain.on('use-branch', (evt, arg) => {
             });
         });
         pubCheckoutWindow.hide();
+    }
+});
+
+ipcMain.on('merge-branch', (evt, arg) => {
+    if (arg !== '' && arg !== null) {
+        const cmd = `cd ${pubPath} && git merge ${arg}`;
+        exec(cmd, (err, stdout, stderr) => {
+            dialog.showMessageBox(pubMergeWindow, {
+                message: `Info: ${stderr}\n ${stdout}`
+            });
+        });
+        pubMergeWindow.hide();
     }
 });
 
@@ -166,6 +193,11 @@ module.exports.gitDiff = (path, window, args) => {
             message: `Info: ${(stderr !== null && stderr !== '') ? stderr : 'No diff'}\n ${stdout}`
         });
     });
+};
+
+module.exports.gitMerge = (path, window, args) => {
+    pubPath = path;
+    pubMergeWindow = createMergeWindow();
 };
 
 module.exports.gitCommit = (path, window, args) => {

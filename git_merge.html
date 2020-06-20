@@ -1,0 +1,57 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+	<link type="text/css" rel="stylesheet" href="assets/styling/materialize/css/materialize.min.css" media="screen, projection">
+	<link rel="stylesheet" type="text/css" href="assets/styling/style.css">
+    <title>Merge</title>
+</head>
+<body>
+    <div class="section no-pad-bot padded">
+        <div class="container">
+            <div class="row center">
+                <div class="input-field">
+                    <select id="branch-selector">
+                        <option value="default" disabled selected>Choose a branch</option>
+                    </select>
+                    <label for="branch-selector">Branch Selector</label>
+                </div>
+            </div>
+            <div class="branch-actions-row row center">
+                <button id="use-branch-button" class="waves-effect button-spin waves-light btn-large blue"><i class="material-icons btn-spinner right">arrow_forward</i> Merge!</button>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" src="assets/styling/materialize/js/materialize.min.js"></script>
+    <script type="text/javascript">
+        M.FormSelect.init(document.querySelectorAll('select'));
+        const {ipcRenderer} = require('electron');
+        window.$ = window.jQuery = require('jquery');
+
+        $('#use-branch-button').on('click', () => {
+            const selectedBranch = $('#branch-selector').val();
+            if (selectedBranch !== '' && selectedBranch !== null) {
+                ipcRenderer.send('merge-branch', selectedBranch);
+            } else {
+                alert('That branch could not be selected!');
+            }
+        });
+
+        ipcRenderer.send('get-branches', 'get');
+
+        ipcRenderer.on('branches-list', (evt, arg) => {
+            const branches = arg.split('\n') || [];
+            branches.forEach((branch) => {
+                if (branch !== '' && branch !== null) {
+                    $('#branch-selector').append(`
+                        <option value="${branch.replace('*', '').trim()}">${branch}</option>
+                    `);
+                }
+            });
+            M.FormSelect.init(document.querySelector('#branch-selector'));
+        });
+
+    </script>
+</body>
+</html>
