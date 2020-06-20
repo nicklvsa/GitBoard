@@ -139,42 +139,6 @@ const setupController = (evt) => {
 		evt.reply('switch-to-loader', 'show');
 	}
 
-	controller.on('down', key => {
-		if (loadedProjects && loadedProjects !== {}) {
-			switch (key) {
-				case 5:
-					gitPush(loadedProjects.path, mainWindow, null)
-					break;
-				case 6:
-					gitPull(loadedProjects.path, mainWindow, null);
-					break;
-				case 7:
-					gitCommit(loadedProjects.path, mainWindow, null)
-					break;
-				case 8:
-					gitCheckout(loadedProjects.path, mainWindow, null);
-					break;
-				case 9:
-					gitMerge(loadedProjects.path, mainWindow, null);
-					break;
-				case 11:
-					gitDiff(loadedProjects.path, mainWindow, null);
-					break;
-				case 12:
-					gitLog(loadedProjects.path, mainWindow, null);
-					break;
-				case 13:
-					gitStatus(loadedProjects.path, mainWindow, null);
-					break;
-				case 14:
-					gitHelp(loadedProjects.path, mainWindow, null);
-					break;
-				default:
-					break;
-			}
-		}
-	});
-
 	controller.on('error', error => {
 		console.error(error);
 		exitApp();
@@ -279,15 +243,15 @@ const genProjectIdentifier = () => {
 
 const setupProjects = (evt) => {
 	if (loadedProjects !== null) {
-		genText(`Push`, useKey(5), controller);
-		genText(`Pull`, useKey(6), controller);
-		genText(`Commit`, useKey(7), controller);
-		genText(`Checkout`, useKey(8), controller);
-		genText(`Merge`, useKey(9), controller);
-		genText(`Diff`, useKey(11), controller);
-		genText(`Log`, useKey(12), controller);
-		genText(`Status`, useKey(13), controller);
-		genText(`Help`, useKey(14), controller);
+		genText(`Push`, useKey(5, gitPush), controller);
+		genText(`Pull`, useKey(6, gitPull), controller);
+		genText(`Commit`, useKey(7, gitCommit), controller);
+		genText(`Checkout`, useKey(8, gitCheckout), controller);
+		genText(`Merge`, useKey(9, gitMerge), controller);
+		genText(`Diff`, useKey(11, gitDiff), controller);
+		genText(`Log`, useKey(12, gitLog), controller);
+		genText(`Status`, useKey(13, gitStatus), controller);
+		genText(`Help`, useKey(14, gitHelp), controller);
 		if (evt !== null) {
 			evt.reply('set-current-project', loadedProjects);
 		} else {
@@ -315,7 +279,12 @@ const clearKeys = () => {
 	}
 }
 
-const useKey = (key) => {
+const useKey = (key, action) => {
+	controller.on('down', (keyDown) => {
+		if (key === keyDown) {
+			action(loadedProjects.path, mainWindow, null);
+		}
+	});
 	runtimeModifiedKeys.push(key);
 	return key;
 };

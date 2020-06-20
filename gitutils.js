@@ -3,6 +3,7 @@ const {exec} = require('child_process');
 const path = require('path');
 const {dialog, BrowserWindow, ipcMain} = require('electron');
 
+// global children window options
 const gitWindowOptions = {
     width: 300,
 	minWidth: 300,
