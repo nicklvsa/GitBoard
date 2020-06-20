@@ -134,6 +134,12 @@ const setupController = (evt) => {
 				TODO: use Stream Deck serial identificaiton to check click
 				events from each individual stream deck
 			*/
+			if (device.model !== 'original') {
+				dialog.showMessageBox(window, {
+					message: `The stream deck "${device.model}" is not yet supported by GitBoard!`,
+				});
+				exitApp();
+			}
 			console.log("Connected Stream Decks: " + JSON.stringify(device));
 		});
 		evt.reply('switch-to-loader', 'show');
@@ -280,6 +286,11 @@ const clearKeys = () => {
 }
 
 const useKey = (key, action) => {
+	for (const k of runtimeModifiedKeys) {
+		if (k === key) {
+			return k;
+		}
+	}
 	controller.on('down', (keyDown) => {
 		if (key === keyDown) {
 			action(loadedProjects.path, mainWindow, null);
