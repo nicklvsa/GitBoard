@@ -95,6 +95,7 @@ ipcMain.on('delete-branch', (evt, arg) => {
     }
 });
 
+// create a new branch
 ipcMain.on('new-branch', (evt, arg) => {
     if (arg !== '' && arg !== null) {
         prompt({
