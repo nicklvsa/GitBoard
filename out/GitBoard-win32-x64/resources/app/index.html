@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>GitBoard</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+	<link type="text/css" rel="stylesheet" href="assets/styling/materialize/css/materialize.min.css" media="screen, projection">
+	<link rel="stylesheet" type="text/css" href="assets/styling/style.css">
+</head>
+<body>
+	<div class="section no-pad-bot padded">
+		<div class="container">
+			<a href="#" id="switch-projects"><h6 class="left" id="current-project">No project active</h6></a>
+		</div>
+		<div class="container">
+			<h1 class="header center blue-text">GitBoard</h1>
+			<div class="row center">
+				<h5 class="header col s12 light">Connect your Stream Deck, open GitBoard, click run!</h5>
+			</div>
+			<div class="row center" id="info-show">
+				<button id="run-button" class="waves-effect button-spin waves-light btn-large blue"><i class="material-icons btn-spinner right">arrow_forward</i> Run GitBoard!</button>
+			</div>
+			<div class="row center" id="cancel-show">
+				<button id="cancel-button" class="waves-effect waves-light btn-large button-spin yellow"><i class="material-icons btn-spinner right">remove</i> Disable GitBoard</button>
+			</div>
+			<div class="row center" id="quit-show">
+				<button id="quit-button" class="waves-effect button-spin waves-light btn-small red"><i class="material-icons btn-spinner right">close</i> Quit GitBoard!</button>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript" src="assets/styling/materialize/js/materialize.min.js"></script>
+	<script type="text/javascript">
+		const {ipcRenderer} = require('electron');
+		window.$ = window.jQuery = require('jquery');
+
+		$('#cancel-button').hide();
+
+		ipcRenderer.on('set-current-project', (evt, arg) => {
+			$('#current-project').text(arg.name);
+		});
+
+		ipcRenderer.on('switch-to-loader', (evt, arg) => {
+			if(arg === "show") {
+				ipcRenderer.send('window-h', '550');
+				$('#info-show').html(`
+					<img class="loader" draggable="false" src="assets/general/loader.gif" alt="GitBoard waiting for input" />
+				`);
+				$('#run-button').hide();
+				$('#cancel-button').show();
+			} else if(arg === "hide") {
+				ipcRenderer.send('window-h', '460');
+				$('#info-show').html(`
+					<button id="run-button" class="waves-effect waves-light btn-large blue"><i class="material-icons right">build</i>Run GitBoard!</button>
+				`);
+			}
+		});
+
+		$('#switch-projects').on('click', () => {
+			ipcRenderer.send('switch-projects', 'click');
+		});
+
+		$('#run-button').on('click', () => {
+			ipcRenderer.send('start-button', 'click');
+		});
+
+		$('#cancel-button').on('click', () => {
+			ipcRenderer.send('cancel-button', 'click');
+		});
+
+		$('#quit-button').on('click', () => {
+			ipcRenderer.send('quit-button', 'click');
+		});
+	</script>
+</body>
+</html>

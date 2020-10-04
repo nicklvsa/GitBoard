@@ -1,0 +1,37 @@
+{
+  "name": "gitboard",
+  "productName": "GitBoard",
+  "version": "0.0.5",
+  "description": "GitBoard - the handy stream deck git command manager!",
+  "author": "Nicklvsa",
+  "repository": "https://github.com/nicklvsa/GitBoard",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:linux": "electron-packager . --overwrite --platform=linux --arch=x64 --out=out",
+    "build:mac": "electron-packager . --overwrite --platform=darwin --arch=x64 --out=out --icon=assets/icon/mac/app.icns --osx-sign.identity='' --extend-info=assets/mac/info.plist",
+    "build:win": "electron-packager . --overwrite --platform=win32 --arch=x64 --out=out --icon=assets/gitboard_app_icon.ico"
+  },
+  "dependencies": {
+    "@julusian/jpeg-turbo": "^0.5.1",
+    "electron-log": "^2.2.14",
+    "electron-prompt": "^1.5.1",
+    "electron-settings": "^3.0.7",
+    "electron-shortcut-normalizer": "^1.0.0",
+    "elgato-stream-deck": "^3.0.0",
+    "jquery": "^3.5.1",
+    "path": "^0.12.7",
+    "pureimage": "^0.2.1",
+    "sharp": "^0.25.4",
+    "stream-buffers": "^3.0.2",
+    "update-electron-app": "^1.1.1",
+    "uuid": "^7.0.3"
+  },
+  "devDependencies": {
+    "electron": "^5.0.2",
+    "electron-packager": "^12.1.0",
+    "electron-rebuild": "^1.10.1",
+    "electron-winstaller": "^2.2.0"
+  },
+  "postinstall": "electron-rebuild --force"
+}
