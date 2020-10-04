@@ -31,14 +31,12 @@ const defaultConfigOpts = {
 if(process.mas) app.setName("GitBoard");
 
 const init = () => {
-
 	makeSingleInstance();
 	handleEvents();
 
 	const createWindow = () => {
 
 		appIcon = new Tray(gitboardIcon);
-
 		const options = {
 			width: 300,
 			minWidth: 300,
@@ -278,7 +276,7 @@ const makeSingleInstance = () => {
 }
 
 const clearKeys = () => {
-	if(runtimeModifiedKeys !== undefined && runtimeModifiedKeys.length !== 0) {
+	if(runtimeModifiedKeys !== null && runtimeModifiedKeys.length !== 0) {
 		for(var i = 0; i < runtimeModifiedKeys.length; i++) {
 			controller.clearKey(runtimeModifiedKeys[i]);
 		}
