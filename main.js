@@ -124,8 +124,8 @@ const init = () => {
 }
 
 const setupController = (evt) => {
-	if(listStreamDecks() !== null && listStreamDecks() !== undefined) {
-		const streamDecks = listStreamDecks();
+	const streamDecks = listStreamDecks();
+	if(streamDecks) {
 		streamDecks.forEach((device) => {
 			/*
 				- GitBoard will only support one Stream Deck -
