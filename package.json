@@ -28,7 +28,7 @@
     "uuid": "^7.0.3"
   },
   "devDependencies": {
-    "electron": "^7.2.4",
+    "electron": "^11.5.0",
     "electron-packager": "^12.1.0",
     "electron-rebuild": "^1.10.1",
     "electron-winstaller": "^2.2.0"
