@@ -22,7 +22,7 @@
     "jquery": "^3.5.1",
     "path": "^0.12.7",
     "pureimage": "^0.2.1",
-    "sharp": "^0.25.4",
+    "sharp": "^0.30.5",
     "stream-buffers": "^3.0.2",
     "update-electron-app": "^1.1.1",
     "uuid": "^7.0.3"
